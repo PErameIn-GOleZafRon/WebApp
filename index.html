@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NDCTBcoin farm</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>NDCTBcoin farm</h1>
+        <div id="balance-container">
+            <span>Баланс: </span><span id="balance">0</span>
+        </div>
+        <div id="clicker-container">
+            <img src="clicker.png" id="clicker" alt="Clicker">
+        </div>
+        <div id="upgrade-container">
+            <h2>Улучшения</h2>
+            <button id="upgrade-click" data-cost="50">Улучшить клик (50)</button>
+            <button id="upgrade-passive" data-cost="500">Пассивный доход (500)</button>
+        </div>
+        <div id="league-container">
+            <h2>Лиги</h2>
+            <div id="league-progress">
+                <div id="league-bar"></div>
+            </div>
+            <span id="league">1 лига</span>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
