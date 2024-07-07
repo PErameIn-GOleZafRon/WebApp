@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (balance >= cost) {
             balance -= cost;
             clickValue += 1;
-            const newCost = cost * 2;
+            const newCost = Math.floor(cost * 1.5);
             upgradeClickButton.setAttribute('data-cost', newCost);
             upgradeClickButton.textContent = `Улучшить клик (${newCost})`;
             updateBalance();
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (balance >= cost) {
             balance -= cost;
             passiveIncome += 1;
-            const newCost = cost * 2;
+            const newCost = Math.floor(cost * 1.5);
             upgradePassiveButton.setAttribute('data-cost', newCost);
             upgradePassiveButton.textContent = `Пассивный доход (${newCost})`;
             updateBalance();
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (balance >= cost && critChance < 30) {
             balance -= cost;
             critChance += 1;
-            const newCost = cost * 2;
+            const newCost = Math.floor(cost * 2);
             upgradeCritButton.setAttribute('data-cost', newCost);
             upgradeCritButton.textContent = `Критический удар (${newCost})`;
             updateBalance();
@@ -145,22 +145,42 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             }
         }
-
-        let leagueProgress = (balance - (currentLeague > 1 ? leagueThresholds[currentLeague - 2] : 0)) /
-                             (leagueThresholds[currentLeague - 1] - (currentLeague > 1 ? leagueThresholds[currentLeague - 2] : 0)) * 100;
-        leagueBar.style.width = `${Math.min(leagueProgress, 100)}%`;
-        leagueElement.textContent = `${currentLeague} лига`;
+        leagueElement.textContent = `${currentLeague + 1} лига`;
+        const nextThreshold = leagueThresholds[currentLeague] || leagueThresholds[leagueThresholds.length - 1];
+        const progress = Math.min((balance / nextThreshold) * 100, 100);
+        leagueBar.style.width = `${progress}%`;
     }
 
-    // Пассивный доход
-    setInterval(function() {
+    function addPassiveIncome() {
         balance += passiveIncome;
         updateBalance();
         updateLeague();
         saveGame();
-    }, 1000);
+    }
 
+    setInterval(addPassiveIncome, 1000);
+
+    // Tab switching logic
+    const clickerTab = document.getElementById('clicker-tab');
+    const upgradeTab = document.getElementById('upgrade-tab');
+    const clickerContainer = document.getElementById('clicker-container');
+    const upgradeContainer = document.getElementById('upgrade-container');
+
+    clickerTab.addEventListener('click', function() {
+        clickerContainer.classList.add('active');
+        upgradeContainer.classList.remove('active');
+        clickerTab.classList.add('active');
+        upgradeTab.classList.remove('active');
+    });
+
+    upgradeTab.addEventListener('click', function() {
+        clickerContainer.classList.remove('active');
+        upgradeContainer.classList.add('active');
+        clickerTab.classList.remove('active');
+        upgradeTab.classList.add('active');
+    });
+
+    // Initialize the game state
     loadGame();
-    updateBalance();
-    updateLeague();
+    clickerContainer.classList.add('active');
 });
