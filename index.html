@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NDCTBcoin farm</title>
     <link rel="stylesheet" href="style.css">
+    <audio id="clickSound" src="click.mp3"></audio>
+    <audio id="menuSound" src="menu.mp3"></audio>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
 </head>
 <body>
     <div class="container">
@@ -22,6 +25,14 @@
                 <button id="upgrade-passive" data-cost="500">Пассивный доход (500)</button>
                 <button id="upgrade-crit" data-cost="1000">Критический удар (1000)</button>
             </div>
+            <div id="friends-container" class="tab-content">
+                <h2>Друзья</h2>
+                <p>Comming Soon</p>
+            </div>
+            <div id="stats-container" class="tab-content">
+                <h2>Статистика</h2>
+                <p>Comming Soon</p>
+            </div>
         </div>
         <div id="league-container">
             <h2>Лиги</h2>
@@ -33,8 +44,10 @@
         <div id="tabs">
             <button id="clicker-tab" class="tab active">Клики</button>
             <button id="upgrade-tab" class="tab">Улучшения</button>
+            <button id="friends-tab" class="tab">Друзья</button>
+            <button id="stats-tab" class="tab">Статистика</button>
         </div>
     </div>
-    <script src="script.js?v=1.3"></script>
+    <script src="script.js?v=1.4"></script>
 </body>
 </html>

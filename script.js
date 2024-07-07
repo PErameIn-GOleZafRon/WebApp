@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let clickValue = 1;
     let passiveIncome = 0;
     let critChance = 0;
+    let lastUpdate = Date.now();
 
     const balanceElement = document.getElementById('balance');
     const clicker = document.getElementById('clicker');
@@ -11,6 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const upgradeCritButton = document.getElementById('upgrade-crit');
     const leagueBar = document.getElementById('league-bar');
     const leagueElement = document.getElementById('league');
+    const clickSound = document.getElementById('clickSound');
+    const menuSound = document.getElementById('menuSound');
+    
 
     let leagueThresholds = [];
     for (let i = 1; i <= 50; i++) {
@@ -38,6 +42,10 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Game loaded:', savedGame);
             updateBalance();
             updateLeague();
+            if (savedGame.lastUpdate) {
+                const timeDiff = Date.now() - savedGame.lastUpdate;
+                balance += passiveIncome * Math.floor(timeDiff / 1000);
+            }
         }
     }
 
@@ -49,32 +57,54 @@ document.addEventListener('DOMContentLoaded', function() {
             critChance: critChance,
             clickUpgradeCost: parseInt(upgradeClickButton.getAttribute('data-cost')),
             passiveUpgradeCost: parseInt(upgradePassiveButton.getAttribute('data-cost')),
-            critUpgradeCost: parseInt(upgradeCritButton.getAttribute('data-cost'))
+            critUpgradeCost: parseInt(upgradeCritButton.getAttribute('data-cost')),
+            lastUpdate: Date.now()
         };
-        console.log('Saving game data:', saveData);
         localStorage.setItem('ndctbcoinFarmSave', JSON.stringify(saveData));
     }
 
     function createClickAnimation(value, x, y, isCrit) {
         const clickValueElement = document.createElement('div');
         clickValueElement.textContent = value;
-        clickValueElement.className = 'click-value' + (isCrit ? ' crit-click' : '');
-        clickValueElement.style.left = `${x}px`;
-        clickValueElement.style.top = `${y}px`;
+        clickValueElement.classList.add('click-value');
+        if (isCrit) clickValueElement.classList.add('crit-click');
+
+        // Получаем координаты верхнего левого угла #clicker относительно окна браузера
+        const clickerRect = clicker.getBoundingClientRect();
+        const clickerOffsetX = clickerRect.left + window.pageXOffset;
+        const clickerOffsetY = clickerRect.top + window.pageYOffset;
+
+        // Вычисляем относительные координаты клика в пределах #clicker
+        const relativeX = x - clickerOffsetX;
+        const relativeY = y - clickerOffsetY;
+
+        // Устанавливаем позицию элемента анимации
+        clickValueElement.style.position = 'absolute';
+        clickValueElement.style.left = `47,5%`;
+        clickValueElement.style.top = `30%`;
+        clickValueElement.style.transform = 'translate(-50%, -50%)';
+
+        // Добавляем элемент анимации в тело документа
         document.body.appendChild(clickValueElement);
+
+        // Удаляем элемент анимации через 1 секунду
         setTimeout(() => {
-            document.body.removeChild(clickValueElement);
+            clickValueElement.remove();
         }, 1000);
     }
 
     clicker.addEventListener('click', function(event) {
         handleMultiClick(event, 1);
+        clickSound.currentTime = 0;
+        clickSound.play();
     });
 
     clicker.addEventListener('touchstart', function(event) {
         event.preventDefault();
         for (let i = 0; i < event.touches.length; i++) {
             handleMultiClick(event.touches[i], 1);
+            clickSound.currentTime = 0;
+            clickSound.play();
         }
     });
 
@@ -83,10 +113,14 @@ document.addEventListener('DOMContentLoaded', function() {
         let value = clickValue * numClicks;
         if (isCrit) value *= 10;
         balance += value;
-        const rect = clicker.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
+
+        // Получаем абсолютные координаты клика относительно окна браузера
+        const x = event.clientX;
+        const y = event.clientY;
+
+        // Создаем анимацию клика внутри #clicker
         createClickAnimation(value, x, y, isCrit);
+
         updateBalance();
         updateLeague();
         saveGame();
@@ -103,6 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateBalance();
             updateLeague();
             saveGame();
+            menuSound.play();
         }
     });
 
@@ -110,13 +145,14 @@ document.addEventListener('DOMContentLoaded', function() {
         let cost = parseInt(upgradePassiveButton.getAttribute('data-cost'));
         if (balance >= cost) {
             balance -= cost;
-            passiveIncome += 1;
+            passiveIncome += 5; // Increased passive income increment
             const newCost = Math.floor(cost * 1.5);
             upgradePassiveButton.setAttribute('data-cost', newCost);
             upgradePassiveButton.textContent = `Пассивный доход (${newCost})`;
             updateBalance();
             updateLeague();
             saveGame();
+            menuSound.play();
         }
     });
 
@@ -131,6 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateBalance();
             updateLeague();
             saveGame();
+            menuSound.play();
         }
     });
 
@@ -163,22 +200,35 @@ document.addEventListener('DOMContentLoaded', function() {
     // Tab switching logic
     const clickerTab = document.getElementById('clicker-tab');
     const upgradeTab = document.getElementById('upgrade-tab');
+    const friendsTab = document.getElementById('friends-tab');
+    const statsTab = document.getElementById('stats-tab');
     const clickerContainer = document.getElementById('clicker-container');
     const upgradeContainer = document.getElementById('upgrade-container');
+    const friendsContainer = document.getElementById('friends-container');
+    const statsContainer = document.getElementById('stats-container');
 
-    clickerTab.addEventListener('click', function() {
-        clickerContainer.classList.add('active');
-        upgradeContainer.classList.remove('active');
-        clickerTab.classList.add('active');
-        upgradeTab.classList.remove('active');
-    });
+    const tabMap = {
+        'clicker-tab': clickerContainer,
+        'upgrade-tab': upgradeContainer,
+        'friends-tab': friendsContainer,
+        'stats-tab': statsContainer
+    };
 
-    upgradeTab.addEventListener('click', function() {
-        clickerContainer.classList.remove('active');
-        upgradeContainer.classList.add('active');
-        clickerTab.classList.remove('active');
-        upgradeTab.classList.add('active');
-    });
+    function switchTab(event) {
+        const tabId = event.target.id;
+        Object.keys(tabMap).forEach(id => {
+            tabMap[id].classList.remove('active');
+            document.getElementById(id).classList.remove('active');
+        });
+        tabMap[tabId].classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+        menuSound.play();
+    }
+
+    clickerTab.addEventListener('click', switchTab);
+    upgradeTab.addEventListener('click', switchTab);
+    friendsTab.addEventListener('click', switchTab);
+    statsTab.addEventListener('click', switchTab);
 
     // Initialize the game state
     loadGame();
