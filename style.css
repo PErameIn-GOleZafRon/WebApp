@@ -1,90 +1,64 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #e0ffe0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
+    background-color: #e0f7fa;
+    color: #00796b;
+    text-align: center;
 }
 
 .container {
-    text-align: center;
-    background-color: #ffffff;
-    border: 2px solid #00cc00;
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-    color: #008000;
+    width: 80%;
+    margin: 0 auto;
 }
 
 #balance-container {
-    font-size: 1.5em;
-    margin-bottom: 20px;
+    margin: 20px 0;
 }
 
 #clicker-container {
+    position: relative;
     margin: 20px 0;
 }
 
 #clicker {
-    width: 150px;
-    height: 150px;
+    width: 200px; /* Увеличенный размер */
     cursor: pointer;
-    border-radius: 50%;
-    transition: transform 0.1s;
-}
-
-#clicker:active {
-    transform: scale(0.95);
 }
 
 #upgrade-container {
     margin: 20px 0;
 }
 
-#upgrade-container button {
-    display: block;
-    width: 80%;
-    margin: 10px auto;
-    padding: 10px;
-    font-size: 1em;
-    color: #ffffff;
-    background-color: #00cc00;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-#upgrade-container button:hover {
-    background-color: #008000;
-}
-
 #league-container {
-    margin-top: 20px;
+    margin: 20px 0;
 }
 
 #league-progress {
     width: 100%;
     height: 20px;
-    background-color: #e0e0e0;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 10px;
+    background-color: #b2dfdb;
+    position: relative;
 }
 
 #league-bar {
-    width: 0%;
     height: 100%;
-    background-color: #00cc00;
-    transition: width 0.2s;
+    background-color: #00796b;
+    width: 0%;
+    transition: width 0.5s;
 }
 
-#league {
-    font-size: 1.2em;
-    color: #008000;
+.click-value {
+    position: absolute;
+    font-size: 20px;
+    color: white;
+    animation: fadeout 1s forwards;
+    pointer-events: none;
+}
+
+.crit-click {
+    color: red;
+}
+
+@keyframes fadeout {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-50px); }
 }
