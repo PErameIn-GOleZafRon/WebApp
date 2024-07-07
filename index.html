@@ -12,14 +12,16 @@
         <div id="balance-container">
             <span>Баланс: </span><span id="balance">0</span>
         </div>
-        <div id="clicker-container">
-            <img src="clicker.png" id="clicker" alt="Clicker">
-        </div>
-        <div id="upgrade-container">
-            <h2>Улучшения</h2>
-            <button id="upgrade-click" data-cost="50">Улучшить клик (50)</button>
-            <button id="upgrade-passive" data-cost="500">Пассивный доход (500)</button>
-            <button id="upgrade-crit" data-cost="1000">Критический удар (1000)</button>
+        <div id="content">
+            <div id="clicker-container" class="tab-content">
+                <img src="clicker.png" id="clicker" alt="Clicker">
+            </div>
+            <div id="upgrade-container" class="tab-content">
+                <h2>Улучшения</h2>
+                <button id="upgrade-click" data-cost="50">Улучшить клик (50)</button>
+                <button id="upgrade-passive" data-cost="500">Пассивный доход (500)</button>
+                <button id="upgrade-crit" data-cost="1000">Критический удар (1000)</button>
+            </div>
         </div>
         <div id="league-container">
             <h2>Лиги</h2>
@@ -28,7 +30,11 @@
             </div>
             <span id="league">1 лига</span>
         </div>
+        <div id="tabs">
+            <button id="clicker-tab" class="tab active">Клики</button>
+            <button id="upgrade-tab" class="tab">Улучшения</button>
+        </div>
     </div>
-    <script src="script.js?v=1.1"></script>
+    <script src="script.js?v=1.3"></script>
 </body>
 </html>
