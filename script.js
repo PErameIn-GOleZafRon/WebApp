@@ -16,10 +16,35 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     let currentLeague = 0;
 
+    function loadGame() {
+        const savedGame = JSON.parse(localStorage.getItem('ndctbcoinFarmSave'));
+        if (savedGame) {
+            balance = savedGame.balance || 0;
+            clickValue = savedGame.clickValue || 1;
+            passiveIncome = savedGame.passiveIncome || 0;
+            upgradeClickButton.setAttribute('data-cost', savedGame.clickUpgradeCost || 50);
+            upgradePassiveButton.setAttribute('data-cost', savedGame.passiveUpgradeCost || 500);
+            updateBalance();
+            updateLeague();
+        }
+    }
+
+    function saveGame() {
+        const saveData = {
+            balance: balance,
+            clickValue: clickValue,
+            passiveIncome: passiveIncome,
+            clickUpgradeCost: parseInt(upgradeClickButton.getAttribute('data-cost')),
+            passiveUpgradeCost: parseInt(upgradePassiveButton.getAttribute('data-cost'))
+        };
+        localStorage.setItem('ndctbcoinFarmSave', JSON.stringify(saveData));
+    }
+
     clicker.addEventListener('click', function() {
         balance += clickValue;
         updateBalance();
         updateLeague();
+        saveGame();
     });
 
     upgradeClickButton.addEventListener('click', function() {
@@ -31,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
             upgradeClickButton.textContent = `Улучшить клик (${cost * 2})`;
             updateBalance();
             updateLeague();
+            saveGame();
         }
     });
 
@@ -43,6 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
             upgradePassiveButton.textContent = `Пассивный доход (${cost * 2})`;
             updateBalance();
             updateLeague();
+            saveGame();
         }
     });
 
@@ -68,7 +95,9 @@ document.addEventListener('DOMContentLoaded', function() {
         balance += passiveIncome;
         updateBalance();
         updateLeague();
+        saveGame();
     }
 
+    loadGame();
     setInterval(passiveIncomeTick, 1000);
 });
