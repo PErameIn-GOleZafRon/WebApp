@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
     clicker.addEventListener('touchstart', function(event) {
         event.preventDefault();
         for (let i = 0; i < event.touches.length; i++) {
-            handleMultiClick(event.touches[i], event.touches.length);
+            handleMultiClick(event.touches[i], 1);
         }
     });
 
@@ -149,3 +149,19 @@ document.addEventListener('DOMContentLoaded', function() {
         let leagueProgress = (balance - (currentLeague > 1 ? leagueThresholds[currentLeague - 2] : 0)) /
                              (leagueThresholds[currentLeague - 1] - (currentLeague > 1 ? leagueThresholds[currentLeague - 2] : 0)) * 100;
         leagueBar.style.width = `${Math.min(leagueProgress, 100)}%`;
+        leagueElement.textContent = `${currentLeague} лига`;
+    }
+
+    // Пассивный доход
+    setInterval(function() {
+        balance += passiveIncome;
+        updateBalance();
+        updateLeague();
+        saveGame();
+    }, 1000);
+
+    loadGame();
+    updateBalance();
+    updateLeague();
+});
+
