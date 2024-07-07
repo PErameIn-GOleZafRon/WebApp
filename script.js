@@ -17,13 +17,19 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentLeague = 0;
 
     function loadGame() {
+        console.log('Loading game data...');
         const savedGame = JSON.parse(localStorage.getItem('ndctbcoinFarmSave'));
         if (savedGame) {
             balance = savedGame.balance || 0;
             clickValue = savedGame.clickValue || 1;
             passiveIncome = savedGame.passiveIncome || 0;
-            upgradeClickButton.setAttribute('data-cost', savedGame.clickUpgradeCost || 50);
-            upgradePassiveButton.setAttribute('data-cost', savedGame.passiveUpgradeCost || 500);
+            const clickUpgradeCost = savedGame.clickUpgradeCost || 50;
+            const passiveUpgradeCost = savedGame.passiveUpgradeCost || 500;
+            upgradeClickButton.setAttribute('data-cost', clickUpgradeCost);
+            upgradePassiveButton.setAttribute('data-cost', passiveUpgradeCost);
+            upgradeClickButton.textContent = `Улучшить клик (${clickUpgradeCost})`;
+            upgradePassiveButton.textContent = `Пассивный доход (${passiveUpgradeCost})`;
+            console.log('Game loaded:', savedGame);
             updateBalance();
             updateLeague();
         }
@@ -37,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
             clickUpgradeCost: parseInt(upgradeClickButton.getAttribute('data-cost')),
             passiveUpgradeCost: parseInt(upgradePassiveButton.getAttribute('data-cost'))
         };
+        console.log('Saving game data:', saveData);
         localStorage.setItem('ndctbcoinFarmSave', JSON.stringify(saveData));
     }
 
@@ -52,8 +59,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (balance >= cost) {
             balance -= cost;
             clickValue += 1;
-            upgradeClickButton.setAttribute('data-cost', cost * 2);
-            upgradeClickButton.textContent = `Улучшить клик (${cost * 2})`;
+            const newCost = cost * 2;
+            upgradeClickButton.setAttribute('data-cost', newCost);
+            upgradeClickButton.textContent = `Улучшить клик (${newCost})`;
             updateBalance();
             updateLeague();
             saveGame();
@@ -65,8 +73,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (balance >= cost) {
             balance -= cost;
             passiveIncome += 1;
-            upgradePassiveButton.setAttribute('data-cost', cost * 2);
-            upgradePassiveButton.textContent = `Пассивный доход (${cost * 2})`;
+            const newCost = cost * 2;
+            upgradePassiveButton.setAttribute('data-cost', newCost);
+            upgradePassiveButton.textContent = `Пассивный доход (${newCost})`;
             updateBalance();
             updateLeague();
             saveGame();
