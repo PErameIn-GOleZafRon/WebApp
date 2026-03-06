@@ -20,42 +20,30 @@ body {
     max-width: 400px;
 }
 
-h1 {
-    color: #008000;
-    font-size: 1.5em;
-}
+h1 { color: #008000; font-size: 1.5em; }
+#balance-container { font-size: 1.5em; margin-bottom: 10px; font-weight: bold; color: #008000; }
 
-#balance-container {
-    font-size: 1.5em;
-    margin-bottom: 10px;
-    font-weight: bold;
-    color: #008000;
-}
+#clicker { width: 250px; height: 250px; cursor: pointer; border-radius: 50%; transition: transform 0.1s; }
+#clicker:active { transform: scale(0.95); }
 
-#clicker-container {
-    margin: 10px 0;
-}
+.tab-content { display: none; min-height: 300px; }
+.tab-content.active { display: block; }
 
-#clicker {
-    width: 250px;
-    height: 250px;
-    cursor: pointer;
-    border-radius: 50%;
-    transition: transform 0.1s;
+/* Стили Биржи */
+.market-card {
+    background: #f9f9f9;
+    border: 2px solid #00cc00;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px auto;
+    width: 90%;
 }
-
-#clicker:active {
-    transform: scale(0.95);
-}
-
-.tab-content {
-    display: none;
-    min-height: 300px;
-}
-
-.tab-content.active {
-    display: block;
-}
+.stock-info { display: flex; flex-direction: column; font-weight: bold; margin-bottom: 10px; }
+#stock-name { font-size: 1.2em; color: #008000; }
+#stock-trend.up { color: #00aa00; }
+#stock-trend.down { color: #ff0000; }
+.market-controls { display: flex; justify-content: space-around; margin-top: 10px; }
+.market-controls button { padding: 8px 12px; border-radius: 5px; border: none; background: #00cc00; color: white; cursor: pointer; }
 
 .stat-item {
     display: flex;
@@ -71,72 +59,18 @@ h1 {
 }
 
 #upgrade-container button {
-    display: block;
-    width: 90%;
-    margin: 8px auto;
-    padding: 12px;
-    font-size: 0.9em;
-    color: #ffffff;
-    background-color: #00cc00;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
+    display: block; width: 90%; margin: 8px auto; padding: 12px; font-size: 0.9em;
+    color: #ffffff; background-color: #00cc00; border: none; border-radius: 8px; cursor: pointer;
 }
 
-#league-progress {
-    width: 100%;
-    height: 15px;
-    background-color: #e0e0e0;
-    border-radius: 10px;
-    overflow: hidden;
-    margin: 10px 0;
-}
+#league-progress { width: 100%; height: 15px; background-color: #e0e0e0; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+#league-bar { width: 0%; height: 100%; background-color: #00cc00; transition: width 0.3s; }
 
-#league-bar {
-    width: 0%;
-    height: 100%;
-    background-color: #00cc00;
-    transition: width 0.3s;
-}
+#tabs { display: flex; justify-content: space-around; margin-top: 15px; background: #00cc00; border-radius: 10px; }
+.tab { flex: 1; padding: 10px 0; cursor: pointer; background: none; border: none; color: white; font-weight: bold; font-size: 0.8em; }
+.tab.active { background-color: #008000; }
 
-#tabs {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 15px;
-    background: #00cc00;
-    border-radius: 10px;
-}
+.click-value { position: absolute; font-size: 24px; font-weight: bold; color: #008000; pointer-events: none; animation: fadeout 1s forwards; z-index: 100; }
+.crit-click { color: #ff0000; font-size: 32px; }
 
-.tab {
-    flex: 1;
-    padding: 12px 0;
-    cursor: pointer;
-    background: none;
-    border: none;
-    color: white;
-    font-weight: bold;
-}
-
-.tab.active {
-    background-color: #008000;
-}
-
-.click-value {
-    position: absolute;
-    font-size: 24px;
-    font-weight: bold;
-    color: #008000;
-    pointer-events: none;
-    animation: fadeout 1s forwards;
-    z-index: 100;
-}
-
-.crit-click {
-    color: #ff0000;
-    font-size: 32px;
-}
-
-@keyframes fadeout {
-    0% { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(-100px); }
-}
+@keyframes fadeout { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
