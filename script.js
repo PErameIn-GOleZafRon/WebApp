@@ -22,6 +22,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     let currentLeague = 0;
 
+    function formatBalance(num) {
+        if (num >= 1000000000) return (num / 1000000000).toFixed(2) + 'B';
+        if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return num.toString();
+    }
+    
     function loadGame() {
         const savedGame = JSON.parse(localStorage.getItem('ndctbcoinFarmSave'));
         if (savedGame) {
@@ -88,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const x = event.clientX || (event.touches && event.touches[0].clientX);
         const y = event.clientY || (event.touches && event.touches[0].clientY);
 
-        createClickAnimation(value, x, y, isCrit);
+        createClickAnimation(formatBalance(value), x, y, isCrit);
 
         updateBalance();
         updateLeague();
@@ -159,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function updateBalance() {
-        balanceElement.textContent = balance;
+        balanceElement.textContent = formatBalance(balance);
     }
 
     function updateLeague() {
