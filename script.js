@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentLeague = 0;
 
     function loadGame() {
-        console.log('Loading game data...');
         const savedGame = JSON.parse(localStorage.getItem('ndctbcoinFarmSave'));
         if (savedGame) {
             balance = savedGame.balance || 0;
@@ -39,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
             upgradeClickButton.textContent = `Улучшить клик (${clickUpgradeCost})`;
             upgradePassiveButton.textContent = `Пассивный доход (${passiveUpgradeCost})`;
             upgradeCritButton.textContent = `Критический удар (${critUpgradeCost})`;
-            console.log('Game loaded:', savedGame);
             updateBalance();
             updateLeague();
             if (savedGame.lastUpdate) {
@@ -65,32 +63,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function createClickAnimation(value, x, y, isCrit) {
         const clickValueElement = document.createElement('div');
-        clickValueElement.textContent = value;
+        clickValueElement.textContent = `+${value}`;
         clickValueElement.classList.add('click-value');
         if (isCrit) clickValueElement.classList.add('crit-click');
 
-        // Получаем координаты верхнего левого угла #clicker относительно окна браузера
-        const clickerRect = clicker.getBoundingClientRect();
-        const clickerOffsetX = clickerRect.left + window.pageXOffset;
-        const clickerOffsetY = clickerRect.top + window.pageYOffset;
+        // Теперь используем реальные координаты клика
+        clickValueElement.style.left = `${x}px`;
+        clickValueElement.style.top = `${y}px`;
 
-        // Вычисляем относительные координаты клика в пределах #clicker
-        const relativeX = x - clickerOffsetX;
-        const relativeY = y - clickerOffsetY;
-
-        // Устанавливаем позицию элемента анимации
-        clickValueElement.style.position = 'absolute';
-        clickValueElement.style.left = `47,5%`;
-        clickValueElement.style.top = `30%`;
-        clickValueElement.style.transform = 'translate(-50%, -50%)';
-
-        // Добавляем элемент анимации в тело документа
         document.body.appendChild(clickValueElement);
 
-        // Удаляем элемент анимации через 1 секунду
         setTimeout(() => {
             clickValueElement.remove();
         }, 1000);
+    }
+
+    function handleMultiClick(event, numClicks) {
+        let isCrit = Math.random() < critChance / 100;
+        let value = clickValue * numClicks;
+        if (isCrit) value *= 10;
+        balance += value;
+
+        // Координаты для анимации
+        const x = event.clientX || (event.touches && event.touches[0].clientX);
+        const y = event.clientY || (event.touches && event.touches[0].clientY);
+
+        createClickAnimation(value, x, y, isCrit);
+
+        updateBalance();
+        updateLeague();
+        saveGame();
     }
 
     clicker.addEventListener('click', function(event) {
@@ -108,23 +110,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    function handleMultiClick(event, numClicks) {
-        let isCrit = Math.random() < critChance / 100;
-        let value = clickValue * numClicks;
-        if (isCrit) value *= 10;
-        balance += value;
-
-        // Получаем абсолютные координаты клика относительно окна браузера
-        const x = event.clientX;
-        const y = event.clientY;
-
-        // Создаем анимацию клика внутри #clicker
-        createClickAnimation(value, x, y, isCrit);
-
-        updateBalance();
-        updateLeague();
-        saveGame();
-    }
+    // ... (остальной код улучшений и табов остается без изменений)
+    // Я сократил для удобства, но если нужно — выкачу полный файл со всеми функциями.
 
     upgradeClickButton.addEventListener('click', function() {
         let cost = parseInt(upgradeClickButton.getAttribute('data-cost'));
