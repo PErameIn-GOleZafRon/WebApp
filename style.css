@@ -1,3 +1,57 @@
+/* Панель разработчика */
+#dev-mode-widget {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: #ffffff;
+    border: 2px solid #00cc00;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    overflow: hidden;
+    transition: width 0.3s ease, border-radius 0.3s ease;
+    width: 140px;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#dev-mode-widget.closed {
+    width: 40px;
+    border-radius: 50%;
+}
+
+#dev-mode-text {
+    color: #008000;
+    font-weight: bold;
+    font-size: 0.8em;
+    white-space: nowrap;
+    margin-left: 12px;
+    flex-grow: 1;
+    transition: opacity 0.2s;
+}
+
+#dev-mode-widget.closed #dev-mode-text {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#dev-mode-toggle {
+    background: none;
+    border: none;
+    color: #00cc00;
+    font-size: 1.2em;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    outline: none;
+}
+
+/* Остальные стили */
 body {
     font-family: Arial, sans-serif;
     background-color: #e0ffe0;
@@ -18,6 +72,7 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 95%;
     max-width: 400px;
+    margin-top: 40px; /* Сдвинули контейнер чуть вниз, чтобы не перекрывался виджетом на мобилках */
 }
 
 h1 { color: #008000; font-size: 1.5em; }
