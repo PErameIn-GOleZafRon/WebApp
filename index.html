@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>NDCTBcoin farm</title>
     <link rel="stylesheet" href="style.css">
     <audio id="clickSound" src="click.mp3"></audio>
     <audio id="menuSound" src="menu.mp3"></audio>
-    <meta name="viewport" content="width=device-width, user-scalable=no">
 </head>
 <body>
     <div class="container">
@@ -16,7 +15,7 @@
             <span>Баланс: </span><span id="balance">0</span>
         </div>
         <div id="content">
-            <div id="clicker-container" class="tab-content">
+            <div id="clicker-container" class="tab-content active">
                 <img src="clicker.png" id="clicker" alt="Clicker">
             </div>
             <div id="upgrade-container" class="tab-content">
@@ -27,11 +26,30 @@
             </div>
             <div id="friends-container" class="tab-content">
                 <h2>Друзья</h2>
-                <p>Comming Soon</p>
+                <p>Coming Soon</p>
             </div>
             <div id="stats-container" class="tab-content">
                 <h2>Статистика</h2>
-                <p>Comming Soon</p>
+                <div class="stat-item">
+                    <span>Всего тапов:</span>
+                    <span id="stat-total-clicks">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Заработано всего:</span>
+                    <span id="stat-total-earned">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Сила клика:</span>
+                    <span id="stat-click-power">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Доход в сек:</span>
+                    <span id="stat-passive-rate">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Шанс крита:</span>
+                    <span id="stat-crit-chance">0%</span>
+                </div>
             </div>
         </div>
         <div id="league-container">
@@ -48,6 +66,6 @@
             <button id="stats-tab" class="tab">Статистика</button>
         </div>
     </div>
-    <script src="script.js?v=1.4"></script>
+    <script src="script.js"></script>
 </body>
 </html>
