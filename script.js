@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalEarned = 0;
     let currentBooster = 1.0;
 
-    // Переменные биржи
     let stockPrice = 100;
     let stocksOwned = 0;
 
@@ -60,8 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function setupBtn(id, cost, text) {
         const btn = document.getElementById(id);
-        btn.setAttribute('data-cost', cost);
-        btn.textContent = `${text} (${formatNum(cost)})`;
+        if(btn) {
+            btn.setAttribute('data-cost', cost);
+            btn.textContent = `${text} (${formatNum(cost)})`;
+        }
     }
 
     function saveGame() {
@@ -88,8 +89,8 @@ document.addEventListener('DOMContentLoaded', function() {
         let nextT = leagueThresholds[leagueIdx] || leagueThresholds[0];
         leagueBar.style.width = `${Math.min((balance / nextT) * 100, 100)}%`;
 
-        myStocksElem.textContent = stocksOwned;
-        stockPriceElem.textContent = `Цена: ${formatNum(stockPrice)}`;
+        if(myStocksElem) myStocksElem.textContent = stocksOwned;
+        if(stockPriceElem) stockPriceElem.textContent = `Цена: ${formatNum(stockPrice)}`;
 
         if (document.getElementById('stats-container').classList.contains('active')) {
             document.getElementById('stat-total-clicks').textContent = totalClicks;
@@ -115,74 +116,76 @@ document.addEventListener('DOMContentLoaded', function() {
         updateUI(); saveGame();
     }
 
-    clicker.addEventListener('click', (e) => { handleTap(e); clickSound.play(); });
-    clicker.addEventListener('touchstart', (e) => { e.preventDefault(); handleTap(e); clickSound.play(); });
+    clicker.addEventListener('click', (e) => { handleTap(e); if(clickSound) clickSound.play(); });
+    clicker.addEventListener('touchstart', (e) => { e.preventDefault(); handleTap(e); if(clickSound) clickSound.play(); });
 
-    // Улучшения
     function bindUpgrade(id, action, mult) {
-        document.getElementById(id).addEventListener('click', function() {
-            let cost = parseInt(this.getAttribute('data-cost'));
-            if (balance >= cost) {
-                balance -= cost; action();
-                let newCost = Math.floor(cost * mult);
-                this.setAttribute('data-cost', newCost);
-                this.textContent = `${this.textContent.split('(')[0]} (${formatNum(newCost)})`;
-                menuSound.play(); updateUI(); saveGame();
-            }
-        });
+        const btn = document.getElementById(id);
+        if(btn) {
+            btn.addEventListener('click', function() {
+                let cost = parseInt(this.getAttribute('data-cost'));
+                if (balance >= cost) {
+                    balance -= cost; action();
+                    let newCost = Math.floor(cost * mult);
+                    this.setAttribute('data-cost', newCost);
+                    this.textContent = `${this.textContent.split('(')[0]} (${formatNum(newCost)})`;
+                    if(menuSound) menuSound.play(); 
+                    updateUI(); saveGame();
+                }
+            });
+        }
     }
     bindUpgrade('upgrade-click', () => clickValue++, 1.5);
     bindUpgrade('upgrade-passive', () => passiveIncome += 5, 1.5);
     bindUpgrade('upgrade-crit', () => { if(critChance < 30) critChance++; }, 2);
 
-    // Логика Биржи
-    document.getElementById('buy-stock').addEventListener('click', () => {
+    // Биржа
+    const buyBtn = document.getElementById('buy-stock');
+    const sellBtn = document.getElementById('sell-stock');
+    if(buyBtn) buyBtn.addEventListener('click', () => {
         if (balance >= stockPrice) {
-            balance -= stockPrice;
-            stocksOwned++;
-            menuSound.play();
-            updateUI();
-            saveGame();
+            balance -= stockPrice; stocksOwned++;
+            if(menuSound) menuSound.play(); updateUI(); saveGame();
         }
     });
-
-    document.getElementById('sell-stock').addEventListener('click', () => {
+    if(sellBtn) sellBtn.addEventListener('click', () => {
         if (stocksOwned > 0) {
-            balance += stocksOwned * stockPrice;
-            totalEarned += stocksOwned * stockPrice;
-            stocksOwned = 0;
-            menuSound.play();
-            updateUI();
-            saveGame();
+            balance += stocksOwned * stockPrice; totalEarned += stocksOwned * stockPrice;
+            stocksOwned = 0; if(menuSound) menuSound.play(); updateUI(); saveGame();
         }
     });
 
     function updateStockMarket() {
-        let changePercent = (Math.random() * 40 - 18); // от -18% до +22%
+        let changePercent = (Math.random() * 40 - 18);
         let oldPrice = stockPrice;
         stockPrice = Math.max(10, stockPrice * (1 + changePercent / 100));
-        
-        let diff = ((stockPrice / oldPrice - 1) * 100).toFixed(1);
-        stockTrendElem.textContent = (diff > 0 ? '+' : '') + diff + '%';
-        stockTrendElem.className = diff > 0 ? 'up' : 'down';
-        
+        if(stockTrendElem) {
+            let diff = ((stockPrice / oldPrice - 1) * 100).toFixed(1);
+            stockTrendElem.textContent = (diff > 0 ? '+' : '') + diff + '%';
+            stockTrendElem.className = diff > 0 ? 'up' : 'down';
+        }
         updateUI();
     }
     setInterval(updateStockMarket, 5000);
 
-    // Табы
+    // ТАБЫ (ИСПРАВЛЕНО)
     const tabs = ['clicker', 'upgrade', 'market', 'friends', 'stats'];
     tabs.forEach(t => {
-        document.getElementById(`${t}-tab`).addEventListener('click', function() {
-            tabs.forEach(name => {
-                document.getElementById(`${name}-container`).classList.remove('active');
-                document.getElementById(`${name}-tab`).classList.remove('active');
+        const tabBtn = document.getElementById(`${t}-tab`);
+        if(tabBtn) {
+            tabBtn.addEventListener('click', function() {
+                tabs.forEach(name => {
+                    const container = document.getElementById(`${name}-container`);
+                    const btn = document.getElementById(`${name}-tab`);
+                    if(container) container.classList.remove('active');
+                    if(btn) btn.classList.remove('active');
+                });
+                document.getElementById(`${t}-container`).classList.add('active');
+                this.classList.add('active');
+                if(menuSound) menuSound.play();
+                updateUI();
             });
-            document.getElementById(`${t}-container`).classList.add('active');
-            this.classList.add('active');
-            menuSound.play();
-            updateUI();
-        });
+        }
     });
 
     setInterval(() => {
