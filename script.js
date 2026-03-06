@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let nextT = leagueThresholds[leagueIdx] || leagueThresholds[0];
         leagueBar.style.width = `${Math.min((balance / nextT) * 100, 100)}%`;
 
-        if(myStocksElem) myStocksElem.textContent = stocksOwned;
+        if(myStocksElem) myStocksElem.textContent = formatNum(stocksOwned);
         if(stockPriceElem) stockPriceElem.textContent = `Цена: ${Math.floor(stockPrice)}`;
         
         if(buyAmountInput && buyBtn) {
@@ -220,7 +220,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function updateStockMarket() {
-        let changePercent = (Math.random() * 40 - 18);
+        // Базовая волатильность от -20% до +20% (ожидание = 0)
+        let changePercent = (Math.random() * 40 - 20);
+        
+        // Гравитация рынка (чтобы не залипало на краях)
+        if (stockPrice > 160) changePercent -= (Math.random() * 10); // Давит вниз
+        if (stockPrice < 90) changePercent += (Math.random() * 10);  // Толкает вверх
+
         let oldPrice = stockPrice;
         
         stockPrice = Math.max(50, Math.min(200, stockPrice * (1 + changePercent / 100)));
