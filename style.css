@@ -6,6 +6,7 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
+    overflow: hidden;
 }
 
 .container {
@@ -25,8 +26,10 @@ h1 {
 }
 
 #balance-container {
-    font-size: 1.2em;
+    font-size: 1.5em;
     margin-bottom: 10px;
+    font-weight: bold;
+    color: #008000;
 }
 
 #clicker-container {
@@ -45,56 +48,39 @@ h1 {
     transform: scale(0.95);
 }
 
-
-
-
-#content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
 .tab-content {
     display: none;
-    transition: opacity 0.3s ease-in-out; /* Плавное появление/исчезание контента */
+    min-height: 300px;
 }
 
 .tab-content.active {
     display: block;
-    opacity: 1;
 }
 
-
-#upgrade-container, #friends-container, #stats-container {
-    margin: 10px 0;
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    background: #f0fdf0;
+    margin: 8px auto;
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: 1px solid #00cc00;
+    width: 90%;
+    color: #008000;
+    font-weight: bold;
 }
 
 #upgrade-container button {
     display: block;
     width: 90%;
-    margin: 5px auto;
-    padding: 8px;
-    font-size: 0.8em; /* Уменьшено значение */
+    margin: 8px auto;
+    padding: 12px;
+    font-size: 0.9em;
     color: #ffffff;
     background-color: #00cc00;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-#upgrade-container button:hover {
-    background-color: #008000;
-}
-
-#friends-container, #stats-container {
-    font-size: 1.2em;
-    color: #008000;
-}
-
-#league-container {
-    margin-top: 10px;
 }
 
 #league-progress {
@@ -103,64 +89,54 @@ h1 {
     background-color: #e0e0e0;
     border-radius: 10px;
     overflow: hidden;
-    margin-bottom: 5px;
+    margin: 10px 0;
 }
 
 #league-bar {
     width: 0%;
     height: 100%;
     background-color: #00cc00;
-    transition: width 0.2s;
-}
-
-#league {
-    font-size: 1em;
-    color: #008000;
+    transition: width 0.3s;
 }
 
 #tabs {
     display: flex;
     justify-content: space-around;
-    margin-top: 10px;
-    border-radius: 15px;
-    overflow: hidden;
+    margin-top: 15px;
     background: #00cc00;
+    border-radius: 10px;
 }
 
 .tab {
     flex: 1;
-    padding: 10px 0;
+    padding: 12px 0;
     cursor: pointer;
-    background-color: #00cc00;
-    color: #ffffff;
+    background: none;
     border: none;
-    transition: background-color 0.2s;
-    font-size: 0.8em; /* Уменьшено значение */
-    text-align: center;
-    position: relative;
-}
-
-.tab:hover {
-    background-color: #008000;
+    color: white;
+    font-weight: bold;
 }
 
 .tab.active {
-    background-color: #006600;
+    background-color: #008000;
 }
 
 .click-value {
     position: absolute;
-    font-size: 20px;
-    color: #333333;
-    animation: fadeout 1s forwards;
+    font-size: 24px;
+    font-weight: bold;
+    color: #008000;
     pointer-events: none;
+    animation: fadeout 1s forwards;
+    z-index: 100;
 }
 
 .crit-click {
-    color: red;
+    color: #ff0000;
+    font-size: 32px;
 }
 
 @keyframes fadeout {
     0% { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(-50px); }
+    100% { opacity: 0; transform: translateY(-100px); }
 }
