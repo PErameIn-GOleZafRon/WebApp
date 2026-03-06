@@ -7,17 +7,15 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalEarned = 0;
     let currentBooster = 1.0;
 
-    // Переменные биржи
     let stockPrice = 100;
     let stocksOwned = 0;
-    let stockHistory = new Array(12).fill(100); // 12 точек (1 минута)
+    let stockHistory = new Array(12).fill(100);
 
     const balanceElement = document.getElementById('balance');
     const clicker = document.getElementById('clicker');
     const leagueBar = document.getElementById('league-bar');
     const leagueElement = document.getElementById('league');
     
-    // Элементы биржи
     const stockPriceElem = document.getElementById('stock-price');
     const stockTrendElem = document.getElementById('stock-trend');
     const myStocksElem = document.getElementById('my-stocks');
@@ -66,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             updateUI();
         } else {
-            drawChart(); // Отрисовка дефолтного графика
+            drawChart(); 
         }
     }
 
@@ -99,14 +97,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         ctx.clearRect(0, 0, w, h);
         
-        // Линии сетки
         ctx.strokeStyle = '#e0ffe0';
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(0, h/2); ctx.lineTo(w, h/2);
         ctx.stroke();
 
-        // Линия графика
         ctx.strokeStyle = '#008000';
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -118,7 +114,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         stockHistory.forEach((price, i) => {
             const x = i * stepX;
-            // Инвертируем Y, так как координаты canvas идут сверху вниз
             const y = h - ((price - minP) / range) * h;
             if (i === 0) ctx.moveTo(x, y);
             else ctx.lineTo(x, y);
@@ -139,11 +134,9 @@ document.addEventListener('DOMContentLoaded', function() {
         let nextT = leagueThresholds[leagueIdx] || leagueThresholds[0];
         leagueBar.style.width = `${Math.min((balance / nextT) * 100, 100)}%`;
 
-        // Обновление интерфейса биржи
         if(myStocksElem) myStocksElem.textContent = stocksOwned;
         if(stockPriceElem) stockPriceElem.textContent = `Цена: ${Math.floor(stockPrice)}`;
         
-        // Динамическая кнопка покупки
         if(buyAmountInput && buyBtn) {
             let amt = parseInt(buyAmountInput.value) || 0;
             if (amt < 1) amt = 1;
@@ -160,7 +153,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Слушатель для инпута количества акций
     if(buyAmountInput) {
         buyAmountInput.addEventListener('input', updateUI);
     }
@@ -203,7 +195,6 @@ document.addEventListener('DOMContentLoaded', function() {
     bindUpgrade('upgrade-passive', () => passiveIncome += 5, 1.5);
     bindUpgrade('upgrade-crit', () => { if(critChance < 30) critChance++; }, 2);
 
-    // Логика кнопок биржи
     if(buyBtn) buyBtn.addEventListener('click', () => {
         let amt = parseInt(buyAmountInput.value) || 0;
         if (amt < 1) return;
@@ -229,13 +220,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function updateStockMarket() {
-        let changePercent = (Math.random() * 40 - 18); // от -18% до +22%
+        let changePercent = (Math.random() * 40 - 18);
         let oldPrice = stockPrice;
         
-        // Новая цена с лимитами от 50 до 200
         stockPrice = Math.max(50, Math.min(200, stockPrice * (1 + changePercent / 100)));
         
-        // Обновляем историю графика
         stockHistory.push(stockPrice);
         if(stockHistory.length > 12) {
             stockHistory.shift();
@@ -253,7 +242,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     setInterval(updateStockMarket, 5000);
 
-    // Табы
     const tabs = ['clicker', 'upgrade', 'market', 'friends', 'stats'];
     tabs.forEach(t => {
         const tabBtn = document.getElementById(`${t}-tab`);
@@ -269,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.classList.add('active');
                 if(menuSound) menuSound.play();
                 updateUI();
-                if(t === 'market') drawChart(); // Перерисовываем при открытии вкладки
+                if(t === 'market') drawChart();
             });
         }
     });
@@ -281,6 +269,20 @@ document.addEventListener('DOMContentLoaded', function() {
             updateUI(); saveGame();
         }
     }, 1000);
+
+    // Логика виджета разработчика
+    const devWidget = document.getElementById('dev-mode-widget');
+    const devToggle = document.getElementById('dev-mode-toggle');
+    if (devWidget && devToggle) {
+        devToggle.addEventListener('click', () => {
+            devWidget.classList.toggle('closed');
+            if (devWidget.classList.contains('closed')) {
+                devToggle.innerHTML = '▶';
+            } else {
+                devToggle.innerHTML = '◀';
+            }
+        });
+    }
 
     loadGame();
 });
