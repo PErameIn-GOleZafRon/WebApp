@@ -3,228 +3,163 @@ document.addEventListener('DOMContentLoaded', function() {
     let clickValue = 1;
     let passiveIncome = 0;
     let critChance = 0;
-    let lastUpdate = Date.now();
+    let totalClicks = 0;
+    let totalEarned = 0;
 
     const balanceElement = document.getElementById('balance');
     const clicker = document.getElementById('clicker');
-    const upgradeClickButton = document.getElementById('upgrade-click');
-    const upgradePassiveButton = document.getElementById('upgrade-passive');
-    const upgradeCritButton = document.getElementById('upgrade-crit');
     const leagueBar = document.getElementById('league-bar');
     const leagueElement = document.getElementById('league');
+    
     const clickSound = document.getElementById('clickSound');
     const menuSound = document.getElementById('menuSound');
-    
+
+    // Форматирование чисел (K, M, B)
+    function formatNum(num) {
+        if (num >= 1000000000) return (num / 1000000000).toFixed(2) + 'B';
+        if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return Math.floor(num).toString();
+    }
 
     let leagueThresholds = [];
     for (let i = 1; i <= 50; i++) {
         leagueThresholds.push(Math.pow(10, i + 2));
     }
-    let currentLeague = 0;
 
-    function formatBalance(num) {
-        if (num >= 1000000000) return (num / 1000000000).toFixed(2) + 'B';
-        if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
-        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-        return num.toString();
-    }
-    
     function loadGame() {
-        const savedGame = JSON.parse(localStorage.getItem('ndctbcoinFarmSave'));
-        if (savedGame) {
-            balance = savedGame.balance || 0;
-            clickValue = savedGame.clickValue || 1;
-            passiveIncome = savedGame.passiveIncome || 0;
-            critChance = savedGame.critChance || 0;
-            const clickUpgradeCost = savedGame.clickUpgradeCost || 50;
-            const passiveUpgradeCost = savedGame.passiveUpgradeCost || 500;
-            const critUpgradeCost = savedGame.critUpgradeCost || 1000;
-            upgradeClickButton.setAttribute('data-cost', clickUpgradeCost);
-            upgradePassiveButton.setAttribute('data-cost', passiveUpgradeCost);
-            upgradeCritButton.setAttribute('data-cost', critUpgradeCost);
-            upgradeClickButton.textContent = `Улучшить клик (${clickUpgradeCost})`;
-            upgradePassiveButton.textContent = `Пассивный доход (${passiveUpgradeCost})`;
-            upgradeCritButton.textContent = `Критический удар (${critUpgradeCost})`;
-            updateBalance();
-            updateLeague();
-            if (savedGame.lastUpdate) {
-                const timeDiff = Date.now() - savedGame.lastUpdate;
-                balance += passiveIncome * Math.floor(timeDiff / 1000);
+        const saved = JSON.parse(localStorage.getItem('ndctbcoinFarmSave'));
+        if (saved) {
+            balance = saved.balance || 0;
+            clickValue = saved.clickValue || 1;
+            passiveIncome = saved.passiveIncome || 0;
+            critChance = saved.critChance || 0;
+            totalClicks = saved.totalClicks || 0;
+            totalEarned = saved.totalEarned || balance;
+
+            setupBtn('upgrade-click', saved.clickUpgradeCost || 50, 'Улучшить клик');
+            setupBtn('upgrade-passive', saved.passiveUpgradeCost || 500, 'Пассивный доход');
+            setupBtn('upgrade-crit', saved.critUpgradeCost || 1000, 'Критический удар');
+
+            if (saved.lastUpdate) {
+                const timeDiff = Math.floor((Date.now() - saved.lastUpdate) / 1000);
+                const earned = passiveIncome * timeDiff;
+                balance += earned;
+                totalEarned += earned;
             }
+            updateUI();
         }
+    }
+
+    function setupBtn(id, cost, text) {
+        const btn = document.getElementById(id);
+        btn.setAttribute('data-cost', cost);
+        btn.textContent = `${text} (${formatNum(cost)})`;
     }
 
     function saveGame() {
-        const saveData = {
-            balance: balance,
-            clickValue: clickValue,
-            passiveIncome: passiveIncome,
-            critChance: critChance,
-            clickUpgradeCost: parseInt(upgradeClickButton.getAttribute('data-cost')),
-            passiveUpgradeCost: parseInt(upgradePassiveButton.getAttribute('data-cost')),
-            critUpgradeCost: parseInt(upgradeCritButton.getAttribute('data-cost')),
+        const data = {
+            balance, clickValue, passiveIncome, critChance, totalClicks, totalEarned,
+            clickUpgradeCost: parseInt(document.getElementById('upgrade-click').getAttribute('data-cost')),
+            passiveUpgradeCost: parseInt(document.getElementById('upgrade-passive').getAttribute('data-cost')),
+            critUpgradeCost: parseInt(document.getElementById('upgrade-crit').getAttribute('data-cost')),
             lastUpdate: Date.now()
         };
-        localStorage.setItem('ndctbcoinFarmSave', JSON.stringify(saveData));
+        localStorage.setItem('ndctbcoinFarmSave', JSON.stringify(data));
     }
 
-    function createClickAnimation(value, x, y, isCrit) {
-        const clickValueElement = document.createElement('div');
-        clickValueElement.textContent = `+${value}`;
-        clickValueElement.classList.add('click-value');
-        if (isCrit) clickValueElement.classList.add('crit-click');
-
-        // Теперь используем реальные координаты клика
-        clickValueElement.style.left = `${x}px`;
-        clickValueElement.style.top = `${y}px`;
-
-        document.body.appendChild(clickValueElement);
-
-        setTimeout(() => {
-            clickValueElement.remove();
-        }, 1000);
-    }
-
-    function handleMultiClick(event, numClicks) {
-        let isCrit = Math.random() < critChance / 100;
-        let value = clickValue * numClicks;
-        if (isCrit) value *= 10;
-        balance += value;
-
-        // Координаты для анимации
-        const x = event.clientX || (event.touches && event.touches[0].clientX);
-        const y = event.clientY || (event.touches && event.touches[0].clientY);
-
-        createClickAnimation(formatBalance(value), x, y, isCrit);
-
-        updateBalance();
-        updateLeague();
-        saveGame();
-    }
-
-    clicker.addEventListener('click', function(event) {
-        handleMultiClick(event, 1);
-        clickSound.currentTime = 0;
-        clickSound.play();
-    });
-
-    clicker.addEventListener('touchstart', function(event) {
-        event.preventDefault();
-        for (let i = 0; i < event.touches.length; i++) {
-            handleMultiClick(event.touches[i], 1);
-            clickSound.currentTime = 0;
-            clickSound.play();
-        }
-    });
-
-    // ... (остальной код улучшений и табов остается без изменений)
-    // Я сократил для удобства, но если нужно — выкачу полный файл со всеми функциями.
-
-    upgradeClickButton.addEventListener('click', function() {
-        let cost = parseInt(upgradeClickButton.getAttribute('data-cost'));
-        if (balance >= cost) {
-            balance -= cost;
-            clickValue += 1;
-            const newCost = Math.floor(cost * 1.5);
-            upgradeClickButton.setAttribute('data-cost', newCost);
-            upgradeClickButton.textContent = `Улучшить клик (${newCost})`;
-            updateBalance();
-            updateLeague();
-            saveGame();
-            menuSound.play();
-        }
-    });
-
-    upgradePassiveButton.addEventListener('click', function() {
-        let cost = parseInt(upgradePassiveButton.getAttribute('data-cost'));
-        if (balance >= cost) {
-            balance -= cost;
-            passiveIncome += 5; // Increased passive income increment
-            const newCost = Math.floor(cost * 1.5);
-            upgradePassiveButton.setAttribute('data-cost', newCost);
-            upgradePassiveButton.textContent = `Пассивный доход (${newCost})`;
-            updateBalance();
-            updateLeague();
-            saveGame();
-            menuSound.play();
-        }
-    });
-
-    upgradeCritButton.addEventListener('click', function() {
-        let cost = parseInt(upgradeCritButton.getAttribute('data-cost'));
-        if (balance >= cost && critChance < 30) {
-            balance -= cost;
-            critChance += 1;
-            const newCost = Math.floor(cost * 2);
-            upgradeCritButton.setAttribute('data-cost', newCost);
-            upgradeCritButton.textContent = `Критический удар (${newCost})`;
-            updateBalance();
-            updateLeague();
-            saveGame();
-            menuSound.play();
-        }
-    });
-
-    function updateBalance() {
-        balanceElement.textContent = formatBalance(balance);
-    }
-
-    function updateLeague() {
+    function updateUI() {
+        balanceElement.textContent = formatNum(balance);
+        
+        // Обновление лиги
+        let leagueIdx = 0;
         for (let i = leagueThresholds.length - 1; i >= 0; i--) {
-            if (balance >= leagueThresholds[i]) {
-                currentLeague = i + 1;
-                break;
-            }
+            if (balance >= leagueThresholds[i]) { leagueIdx = i + 1; break; }
         }
-        leagueElement.textContent = `${currentLeague + 1} лига`;
-        const nextThreshold = leagueThresholds[currentLeague] || leagueThresholds[leagueThresholds.length - 1];
-        const progress = Math.min((balance / nextThreshold) * 100, 100);
-        leagueBar.style.width = `${progress}%`;
+        leagueElement.textContent = `${leagueIdx + 1} лига`;
+        let nextT = leagueThresholds[leagueIdx] || leagueThresholds[0];
+        leagueBar.style.width = `${Math.min((balance / nextT) * 100, 100)}%`;
+
+        // Обновление статов
+        if (document.getElementById('stats-container').classList.contains('active')) {
+            document.getElementById('stat-total-clicks').textContent = totalClicks;
+            document.getElementById('stat-total-earned').textContent = formatNum(totalEarned);
+            document.getElementById('stat-click-power').textContent = clickValue;
+            document.getElementById('stat-passive-rate').textContent = `${passiveIncome}/сек`;
+            document.getElementById('stat-crit-chance').textContent = `${critChance}%`;
+        }
     }
 
-    function addPassiveIncome() {
-        balance += passiveIncome;
-        updateBalance();
-        updateLeague();
+    function handleTap(e) {
+        let isCrit = Math.random() < critChance / 100;
+        let val = clickValue * (isCrit ? 10 : 1);
+        
+        balance += val;
+        totalEarned += val;
+        totalClicks++;
+
+        const x = e.clientX || (e.touches && e.touches[0].clientX);
+        const y = e.clientY || (e.touches && e.touches[0].clientY);
+
+        const anim = document.createElement('div');
+        anim.textContent = `+${formatNum(val)}`;
+        anim.className = `click-value ${isCrit ? 'crit-click' : ''}`;
+        anim.style.left = `${x}px`;
+        anim.style.top = `${y}px`;
+        document.body.appendChild(anim);
+        setTimeout(() => anim.remove(), 1000);
+
+        updateUI();
         saveGame();
     }
 
-    setInterval(addPassiveIncome, 1000);
+    clicker.addEventListener('click', (e) => { handleTap(e); clickSound.play(); });
+    clicker.addEventListener('touchstart', (e) => { e.preventDefault(); handleTap(e); clickSound.play(); });
 
-    // Tab switching logic
-    const clickerTab = document.getElementById('clicker-tab');
-    const upgradeTab = document.getElementById('upgrade-tab');
-    const friendsTab = document.getElementById('friends-tab');
-    const statsTab = document.getElementById('stats-tab');
-    const clickerContainer = document.getElementById('clicker-container');
-    const upgradeContainer = document.getElementById('upgrade-container');
-    const friendsContainer = document.getElementById('friends-container');
-    const statsContainer = document.getElementById('stats-container');
-
-    const tabMap = {
-        'clicker-tab': clickerContainer,
-        'upgrade-tab': upgradeContainer,
-        'friends-tab': friendsContainer,
-        'stats-tab': statsContainer
-    };
-
-    function switchTab(event) {
-        const tabId = event.target.id;
-        Object.keys(tabMap).forEach(id => {
-            tabMap[id].classList.remove('active');
-            document.getElementById(id).classList.remove('active');
+    // Логика кнопок улучшений
+    function bindUpgrade(id, action, mult) {
+        document.getElementById(id).addEventListener('click', function() {
+            let cost = parseInt(this.getAttribute('data-cost'));
+            if (balance >= cost) {
+                balance -= cost;
+                action();
+                let newCost = Math.floor(cost * mult);
+                this.setAttribute('data-cost', newCost);
+                this.textContent = `${this.textContent.split('(')[0]} (${formatNum(newCost)})`;
+                menuSound.play();
+                updateUI();
+                saveGame();
+            }
         });
-        tabMap[tabId].classList.add('active');
-        document.getElementById(tabId).classList.add('active');
-        menuSound.play();
     }
 
-    clickerTab.addEventListener('click', switchTab);
-    upgradeTab.addEventListener('click', switchTab);
-    friendsTab.addEventListener('click', switchTab);
-    statsTab.addEventListener('click', switchTab);
+    bindUpgrade('upgrade-click', () => clickValue++, 1.5);
+    bindUpgrade('upgrade-passive', () => passiveIncome += 5, 1.5);
+    bindUpgrade('upgrade-crit', () => { if(critChance < 30) critChance++; }, 2);
 
-    // Initialize the game state
+    // Переключение табов
+    const tabs = ['clicker', 'upgrade', 'friends', 'stats'];
+    tabs.forEach(t => {
+        document.getElementById(`${t}-tab`).addEventListener('click', function() {
+            tabs.forEach(name => {
+                document.getElementById(`${name}-container`).classList.remove('active');
+                document.getElementById(`${name}-tab`).classList.remove('active');
+            });
+            document.getElementById(`${t}-container`).classList.add('active');
+            this.classList.add('active');
+            menuSound.play();
+            updateUI();
+        });
+    });
+
+    setInterval(() => {
+        if (passiveIncome > 0) {
+            balance += passiveIncome;
+            totalEarned += passiveIncome;
+            updateUI();
+            saveGame();
+        }
+    }, 1000);
+
     loadGame();
-    clickerContainer.classList.add('active');
 });
