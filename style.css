@@ -42,8 +42,31 @@ h1 { color: #008000; font-size: 1.5em; }
 #stock-name { font-size: 1.2em; color: #008000; }
 #stock-trend.up { color: #00aa00; }
 #stock-trend.down { color: #ff0000; }
+
+#stock-chart {
+    width: 100%;
+    height: 100px;
+    background: #ffffff;
+    border: 1px solid #00cc00;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+.market-input-group { margin: 10px 0; }
+#buy-amount {
+    width: 60%;
+    padding: 8px;
+    border: 2px solid #00cc00;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 1em;
+    font-weight: bold;
+    color: #008000;
+    outline: none;
+}
+
 .market-controls { display: flex; justify-content: space-around; margin-top: 10px; }
-.market-controls button { padding: 8px 12px; border-radius: 5px; border: none; background: #00cc00; color: white; cursor: pointer; }
+.market-controls button { padding: 8px 12px; border-radius: 5px; border: none; background: #00cc00; color: white; cursor: pointer; font-weight: bold;}
 
 .stat-item {
     display: flex;
