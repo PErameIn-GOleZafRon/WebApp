@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let critChance = 0;
     let totalClicks = 0;
     let totalEarned = 0;
+    let currentBooster = 1.0; // Глобальный множитель лиги
 
     const balanceElement = document.getElementById('balance');
     const clicker = document.getElementById('clicker');
@@ -14,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const clickSound = document.getElementById('clickSound');
     const menuSound = document.getElementById('menuSound');
 
-    // Форматирование чисел (K, M, B)
     function formatNum(num) {
         if (num >= 1000000000) return (num / 1000000000).toFixed(2) + 'B';
         if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let leagueThresholds = [];
     for (let i = 1; i <= 50; i++) {
-        leagueThresholds.push(Math.pow(10, i + 2));
+        leagueThresholds.push(Math.pow(10, i + 2)); // 1000, 10000, ...
     }
 
     function loadGame() {
@@ -41,9 +41,11 @@ document.addEventListener('DOMContentLoaded', function() {
             setupBtn('upgrade-passive', saved.passiveUpgradeCost || 500, 'Пассивный доход');
             setupBtn('upgrade-crit', saved.critUpgradeCost || 1000, 'Критический удар');
 
+            updateUI(); // Сначала обновим лигу и бустер
+
             if (saved.lastUpdate) {
                 const timeDiff = Math.floor((Date.now() - saved.lastUpdate) / 1000);
-                const earned = passiveIncome * timeDiff;
+                const earned = (passiveIncome * currentBooster) * timeDiff;
                 balance += earned;
                 totalEarned += earned;
             }
@@ -69,30 +71,34 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateUI() {
-        balanceElement.textContent = formatNum(balance);
-        
-        // Обновление лиги
+        // Расчет лиги и бустера
         let leagueIdx = 0;
         for (let i = leagueThresholds.length - 1; i >= 0; i--) {
             if (balance >= leagueThresholds[i]) { leagueIdx = i + 1; break; }
         }
-        leagueElement.textContent = `${leagueIdx + 1} лига`;
+        currentBooster = 1 + (leagueIdx * 0.3);
+
+        // Обновление баланса и текста лиги
+        balanceElement.textContent = formatNum(balance);
+        leagueElement.textContent = `${leagueIdx + 1} лига (x${currentBooster.toFixed(1)})`;
+        
         let nextT = leagueThresholds[leagueIdx] || leagueThresholds[0];
         leagueBar.style.width = `${Math.min((balance / nextT) * 100, 100)}%`;
 
-        // Обновление статов
+        // Обновление статов (показываем уже бустанутые значения)
         if (document.getElementById('stats-container').classList.contains('active')) {
             document.getElementById('stat-total-clicks').textContent = totalClicks;
             document.getElementById('stat-total-earned').textContent = formatNum(totalEarned);
-            document.getElementById('stat-click-power').textContent = clickValue;
-            document.getElementById('stat-passive-rate').textContent = `${passiveIncome}/сек`;
+            document.getElementById('stat-click-power').textContent = formatNum(clickValue * currentBooster);
+            document.getElementById('stat-passive-rate').textContent = `${formatNum(passiveIncome * currentBooster)}/сек`;
             document.getElementById('stat-crit-chance').textContent = `${critChance}%`;
         }
     }
 
     function handleTap(e) {
         let isCrit = Math.random() < critChance / 100;
-        let val = clickValue * (isCrit ? 10 : 1);
+        // Применяем бустер к клику
+        let val = (clickValue * currentBooster) * (isCrit ? 10 : 1);
         
         balance += val;
         totalEarned += val;
@@ -116,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function() {
     clicker.addEventListener('click', (e) => { handleTap(e); clickSound.play(); });
     clicker.addEventListener('touchstart', (e) => { e.preventDefault(); handleTap(e); clickSound.play(); });
 
-    // Логика кнопок улучшений
     function bindUpgrade(id, action, mult) {
         document.getElementById(id).addEventListener('click', function() {
             let cost = parseInt(this.getAttribute('data-cost'));
@@ -127,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.setAttribute('data-cost', newCost);
                 this.textContent = `${this.textContent.split('(')[0]} (${formatNum(newCost)})`;
                 menuSound.play();
-                updateUI();
+                updateUI(); // После покупки лига может упасть
                 saveGame();
             }
         });
@@ -137,7 +142,6 @@ document.addEventListener('DOMContentLoaded', function() {
     bindUpgrade('upgrade-passive', () => passiveIncome += 5, 1.5);
     bindUpgrade('upgrade-crit', () => { if(critChance < 30) critChance++; }, 2);
 
-    // Переключение табов
     const tabs = ['clicker', 'upgrade', 'friends', 'stats'];
     tabs.forEach(t => {
         document.getElementById(`${t}-tab`).addEventListener('click', function() {
@@ -154,8 +158,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     setInterval(() => {
         if (passiveIncome > 0) {
-            balance += passiveIncome;
-            totalEarned += passiveIncome;
+            // Применяем бустер к пассивному доходу
+            let earned = passiveIncome * currentBooster;
+            balance += earned;
+            totalEarned += earned;
             updateUI();
             saveGame();
         }
